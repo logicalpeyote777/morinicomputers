@@ -1,0 +1,6 @@
+__pycache__/
+*.bak
+*.pyc
+.DS_Store
+publish.sh
+REPO_URL
