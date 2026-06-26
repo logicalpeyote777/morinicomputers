@@ -1,0 +1,6 @@
+# Cargar el modulo y leer su ficha: que hace, CVE y la historia del backdoor.
+use exploit/unix/ftp/vsftpd_234_backdoor
+info
+
+# Salimos de Metasploit
+exit -y

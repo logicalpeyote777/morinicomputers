@@ -1,0 +1,5 @@
+# Buscar un exploit por servicio/version en la base de datos de Metasploit.
+search vsftpd
+
+# Salimos de Metasploit
+exit -y

