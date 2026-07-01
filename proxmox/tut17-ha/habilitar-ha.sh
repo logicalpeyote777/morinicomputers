@@ -15,14 +15,16 @@ GRP="${2:-ha-grp}"
 PREF="${3:?falta el nodo preferente}"
 SEC="${4:?falta el nodo secundario}"
 
-# almacenamientos que son compartidos por naturaleza (accesibles desde todos los nodos)
+# ¿el almacenamiento es compartido (accesible desde todos los nodos)?
 es_compartido() {
-  local s="$1"
-  # marcado explícito con 'shared 1'...
-  pvesm config "$s" 2>/dev/null | grep -q 'shared 1' && return 0
-  # ...o de un tipo que siempre es compartido
-  local t; t="$(pvesm config "$s" 2>/dev/null | head -1 | cut -d: -f1)"
-  case "$t" in nfs|cifs|glusterfs|cephfs|rbd|iscsi|iscsidirect|zfs) return 0;; *) return 1;; esac
+  local s="$1" j
+  j="$(pvesh get "/storage/$s" --output-format json 2>/dev/null)"
+  # marcado explícito shared:1 (lo que Proxmox pone a NFS/CIFS/Ceph/iSCSI...)
+  echo "$j" | grep -q '"shared":1' && return 0
+  # respaldo por tipo, por si acaso
+  case "$(echo "$j" | grep -oP '"type":"\K[^"]+')" in
+    nfs|cifs|glusterfs|cephfs|rbd|iscsi|iscsidirect|zfs) return 0;; *) return 1;;
+  esac
 }
 
 echo "== 1/3  el clúster tiene quórum =="
