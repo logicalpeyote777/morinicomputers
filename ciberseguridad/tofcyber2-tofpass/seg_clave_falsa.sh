@@ -5,7 +5,7 @@
 # en el laboratorio AISLADO de Morini; solo hashes propios, fines educativos.
 set -u
 DIC=/root/diccionario.txt
-RULE=/usr/share/hashcat/rules/best64.rule
+RULE=/usr/share/hashcat/rules/dive.rule   # reglas amplias: capitaliza, anade numeros, leet (@,0,3...)
 
 # 4 claves que PARECEN complejas: palabra comun + Mayuscula + numero(s)
 printf '%s\n' Password1 Qwerty123 Monkey1 Dragon123 > /root/claves_falsas_plain.txt
