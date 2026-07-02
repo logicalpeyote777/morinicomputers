@@ -1,0 +1,18 @@
+# configurar-vms.yml — configura POR DENTRO todas las VMs del inventario, en masa
+# Tutorial: «Automatiza Proxmox con Ansible» — Morini Computers (YouTube)
+# Se ejecuta vía SSH con la llave inyectada por cloud-init. Idempotente: relánzalo
+# cuando quieras; si todo está en su sitio, changed=0.
+- name: Configurar los servidores de la pyme
+  hosts: pyme
+  become: true
+  tasks:
+    - name: Instalar nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Página de bienvenida propia
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        content: "<h1>{{ inventory_hostname }} — configurado por Ansible</h1>\n"

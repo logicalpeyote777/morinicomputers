@@ -1,0 +1,52 @@
+# crear-vms.yml — crea las VMs de la pyme en masa clonando la plantilla cloud-init
+# Tutorial: «Automatiza Proxmox con Ansible» — Morini Computers (YouTube)
+# Requisitos: ansible + python3-proxmoxer, usuario ansible@pve con token de API
+# (roles PVEVMAdmin, PVEDatastoreUser, PVEAuditor, PVESDNUser) y la plantilla 9000.
+# Sustituye TU_SECRETO por el secreto de tu token, y ajusta IPs/nodos a tu red.
+- name: Crear las VMs de la pyme
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  module_defaults:
+    community.proxmox.proxmox_kvm:
+      api_host: 192.168.1.71
+      api_user: ansible@pve
+      api_token_id: automatizacion
+      api_token_secret: TU_SECRETO
+  vars:
+    vms:
+      - { name: web-pyme, vmid: 300, node: pve-a, ip: 192.168.1.150 }
+      - { name: app-pyme, vmid: 301, node: pve-b, ip: 192.168.1.151 }
+      - { name: db-pyme,  vmid: 302, node: pve-a, ip: 192.168.1.152 }
+  tasks:
+    - name: Clonar la plantilla cloud-init
+      community.proxmox.proxmox_kvm:
+        node: pve-a
+        clone: plantilla-debian12
+        vmid: 9000
+        newid: "{{ item.vmid }}"
+        name: "{{ item.name }}"
+        target: "{{ item.node }}"
+        storage: nfs-ha
+        full: true
+        timeout: 600
+      loop: "{{ vms }}"
+
+    - name: IP fija, DNS y llave SSH (cloud-init)
+      community.proxmox.proxmox_kvm:
+        node: "{{ item.node }}"
+        vmid: "{{ item.vmid }}"
+        update: true
+        nameservers:
+          - 192.168.1.1
+        ipconfig:
+          ipconfig0: "ip={{ item.ip }}/24,gw=192.168.1.1"
+        sshkeys: "{{ lookup('file', '~/.ssh/id_ed25519.pub') }}"
+      loop: "{{ vms }}"
+
+    - name: Arrancarlas
+      community.proxmox.proxmox_kvm:
+        node: "{{ item.node }}"
+        vmid: "{{ item.vmid }}"
+        state: started
+      loop: "{{ vms }}"
