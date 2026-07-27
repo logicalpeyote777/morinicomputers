@@ -1,0 +1,17 @@
+# cadena_adversario.yml - el "adversario" que emulamos: una intrusion tipica en una PYME,
+# de reconocimiento a persistencia, robo de datos y borrado de huellas. Se copia a
+# caldera/data/adversaries/.   github.com/logicalpeyote777/morinicomputers
+id: bb000000-0000-4000-8000-000000000001
+name: Intrusion tipica en una PYME
+description: Cadena de 9 acciones ATT&CK contra un servidor Linux de empresa
+atomic_ordering:
+  - aa000001-0000-4000-8000-00000000t082
+  - aa000002-0000-4000-8000-00000000t087
+  - aa000003-0000-4000-8000-00000000t046
+  - aa000004-0000-4000-8000-00000000t136
+  - aa000005-0000-4000-8000-00000000t098
+  - aa000006-0000-4000-8000-00000000t053
+  - aa000007-0000-4000-8000-00000000t543
+  - aa000008-0000-4000-8000-00000000t074
+  - aa000009-0000-4000-8000-00000000t070
+objective: 495a9828-cab1-44dd-a0ca-66e58177d8cc

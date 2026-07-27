@@ -1,0 +1,70 @@
+<!-- local_rules.xml - reglas de deteccion derivadas de reglas Sigma, con su tecnica ATT&CK.
+     Van en /var/ossec/etc/rules/ del servidor Wazuh.  Cada regla lleva <mitre>: por eso
+     cobertura.sh puede medir que parte de la matriz ATT&CK ve tu SIEM.
+     Codigo completo: github.com/logicalpeyote777/morinicomputers -->
+<group name="purple_team,attack,">
+
+  <!-- ===== Telemetria de ejecucion: snoopy escribe cada comando en auth.log ===== -->
+  <rule id="100200" level="0">
+    <program_name>snoopy</program_name>
+    <description>Telemetria de ejecucion de comandos (snoopy)</description>
+  </rule>
+
+  <rule id="100210" level="8">
+    <if_sid>100200</if_sid>
+    <match>cat /etc/passwd|getent shadow|getent group sudo|cut -d: -f1 /etc/passwd</match>
+    <description>T1087.001 - Enumeracion de cuentas locales</description>
+    <mitre><id>T1087.001</id></mitre>
+  </rule>
+
+  <rule id="100211" level="5">
+    <if_sid>100200</if_sid>
+    <match>uname -a|hostnamectl|cat /etc/os-release|lscpu</match>
+    <description>T1082 - Reconocimiento del sistema</description>
+    <mitre><id>T1082</id></mitre>
+  </rule>
+
+  <rule id="100212" level="8">
+    <if_sid>100200</if_sid>
+    <match>ss -tulpn|netstat -tulpn|nmap|/dev/tcp/</match>
+    <description>T1046 - Descubrimiento de servicios de red</description>
+    <mitre><id>T1046</id></mitre>
+  </rule>
+
+  <rule id="100213" level="10">
+    <if_sid>100200</if_sid>
+    <match>tar -czf /tmp/|tar czf /tmp/|zip -r /tmp/</match>
+    <description>T1074.001 - Datos empaquetados en /tmp para exfiltrarlos</description>
+    <mitre><id>T1074.001</id></mitre>
+  </rule>
+
+  <rule id="100214" level="12">
+    <if_sid>100200</if_sid>
+    <match>history -c|truncate -s0|rm /root/.bash_history|shred </match>
+    <description>T1070.003 - Borrado del historial de comandos</description>
+    <mitre><id>T1070.003</id></mitre>
+  </rule>
+
+  <!-- ===== Persistencia: la ve el FIM en tiempo real (reglas 550/554) ===== -->
+  <rule id="100220" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file">/root/.ssh/authorized_keys</field>
+    <description>T1098.004 - Clave SSH plantada en authorized_keys</description>
+    <mitre><id>T1098.004</id></mitre>
+  </rule>
+
+  <rule id="100221" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file">^/etc/cron</field>
+    <description>T1053.003 - Persistencia por tarea programada (cron)</description>
+    <mitre><id>T1053.003</id></mitre>
+  </rule>
+
+  <rule id="100222" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file">^/etc/systemd/system</field>
+    <description>T1543.002 - Persistencia por servicio systemd</description>
+    <mitre><id>T1543.002</id></mitre>
+  </rule>
+
+</group>

