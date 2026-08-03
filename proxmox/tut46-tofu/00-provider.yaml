@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: proxmox-credentials
+  namespace: crossplane-system
+type: Opaque
+stringData:
+  PROXMOX_VE_ENDPOINT: "https://192.168.1.29:8006/"
+  PROXMOX_VE_API_TOKEN: "crossplane@pve!xp=PON-AQUI-TU-SECRETO"
+  PROXMOX_VE_INSECURE: "true"
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: proxmox-runtime
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              args: ["--debug", "--poll=30s", "--poll-jitter=5s", "--max-reconcile-rate=5"]
+              envFrom:
+                - secretRef:
+                    name: proxmox-credentials
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-terraform
+spec:
+  package: xpkg.upbound.io/upbound/provider-terraform:v0.20.0
+  runtimeConfigRef:
+    name: proxmox-runtime

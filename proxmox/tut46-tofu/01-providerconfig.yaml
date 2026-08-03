@@ -1,0 +1,23 @@
+apiVersion: tf.upbound.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: default
+spec:
+  configuration: |
+    terraform {
+      required_providers {
+        proxmox = {
+          source  = "bpg/proxmox"
+          version = "0.87.0"
+        }
+      }
+      backend "kubernetes" {
+        secret_suffix     = "tut46"
+        namespace         = "crossplane-system"
+        in_cluster_config = true
+      }
+    }
+    provider "proxmox" {
+      insecure = true
+      ssh { agent = false }
+    }

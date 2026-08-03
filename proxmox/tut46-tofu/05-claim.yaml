@@ -1,0 +1,11 @@
+apiVersion: morini.io/v1alpha1
+kind: VM
+metadata:
+  name: web-pyme
+  namespace: default
+spec:
+  nombre: web-pyme
+  replicas: 1
+  cores: 1
+  memoryMB: 512
+  diskGB: 11

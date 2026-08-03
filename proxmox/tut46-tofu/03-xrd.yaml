@@ -1,0 +1,58 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xvms.morini.io
+spec:
+  group: morini.io
+  names:
+    kind: XVM
+    plural: xvms
+  claimNames:
+    kind: VM
+    plural: vms
+  defaultCompositionRef:
+    name: vms-proxmox
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: "Prefijo del nombre de las VMs en Proxmox"
+                replicas:
+                  type: integer
+                  description: "Cuántas VMs idénticas quieres (autoescalado)"
+                  default: 1
+                  minimum: 1
+                  maximum: 8
+                cores:
+                  type: integer
+                  default: 2
+                  minimum: 1
+                  maximum: 8
+                memoryMB:
+                  type: integer
+                  default: 1024
+                  minimum: 512
+                diskGB:
+                  type: integer
+                  default: 11
+                  minimum: 11
+                vmidBase:
+                  type: integer
+                  default: 4601
+              required:
+                - nombre
+            status:
+              type: object
+              properties:
+                vmids:
+                  type: string
+                  description: "VMIDs reales que existen ahora en Proxmox"

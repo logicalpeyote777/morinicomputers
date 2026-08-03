@@ -1,0 +1,125 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: vms-proxmox
+spec:
+  compositeTypeRef:
+    apiVersion: morini.io/v1alpha1
+    kind: XVM
+  mode: Pipeline
+  pipeline:
+    - step: crear-vms
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          - name: vms-proxmox
+            base:
+              apiVersion: tf.upbound.io/v1beta1
+              kind: Workspace
+              spec:
+                providerConfigRef:
+                  name: default
+                forProvider:
+                  source: Inline
+                  vars:
+                    - key: nombre
+                      value: "sin-nombre"
+                    - key: replicas
+                      value: "1"
+                    - key: cores
+                      value: "2"
+                    - key: memoria
+                      value: "1024"
+                    - key: disco
+                      value: "11"
+                    - key: vmid_base
+                      value: "4601"
+                  module: |
+                    variable "nombre"    { type = string }
+                    variable "replicas"  { type = number }
+                    variable "cores"     { type = number }
+                    variable "memoria"   { type = number }
+                    variable "disco"     { type = number }
+                    variable "vmid_base" { type = number }
+
+                    resource "proxmox_virtual_environment_vm" "vm" {
+                      count           = var.replicas
+                      vm_id           = var.vmid_base + count.index
+                      name            = "${var.nombre}-${count.index + 1}"
+                      node_name       = "proxmox"
+                      description     = "Gestionada por Crossplane. No editar a mano."
+                      tags            = ["crossplane", var.nombre]
+                      started         = true
+                      on_boot         = false
+                      stop_on_destroy = true
+
+                      agent {
+                        enabled = false
+                      }
+                      clone {
+                        vm_id = 9000
+                        full  = false
+                      }
+                      cpu {
+                        cores = var.cores
+                      }
+                      memory {
+                        dedicated = var.memoria
+                      }
+                      disk {
+                        datastore_id = "vmstore"
+                        interface    = "scsi0"
+                        size         = var.disco
+                      }
+                    }
+
+                    output "vmids" {
+                      value = join(",", [for v in proxmox_virtual_environment_vm.vm : tostring(v.vm_id)])
+                    }
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.nombre
+                toFieldPath: spec.forProvider.vars[0].value
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.replicas
+                toFieldPath: spec.forProvider.vars[1].value
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.cores
+                toFieldPath: spec.forProvider.vars[2].value
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.memoryMB
+                toFieldPath: spec.forProvider.vars[3].value
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.diskGB
+                toFieldPath: spec.forProvider.vars[4].value
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.vmidBase
+                toFieldPath: spec.forProvider.vars[5].value
+                transforms:
+                  - type: convert
+                    convert:
+                      toType: string
+              - type: ToCompositeFieldPath
+                fromFieldPath: status.atProvider.outputs.vmids
+                toFieldPath: status.vmids
+                policy:
+                  fromFieldPath: Optional
