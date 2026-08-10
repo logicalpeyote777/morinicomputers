@@ -1,0 +1,28 @@
+  ¿CUANDO USAR RBD MIRRORING ENTRE DOS CLUSTERES?   (y cuando NO)
+
+  NO lo uses si...
+    - Tienes UN solo sitio            -> te sobra con Ceph replicado + PBS
+    - Solo quieres copias de seguridad -> Proxmox Backup Server, y punto
+    - Todo esta en el mismo cluster    -> replicacion ZFS o HA, mas simple
+    - No tienes enlace decente entre sedes -> el espejo nunca alcanzara
+
+  SI compensa cuando...
+    - DOS sedes (o sede + colocation) y el negocio no puede parar un dia
+    - Objetivo de recuperacion en MINUTOS, no en horas de restauracion
+    - Quieres arrancar las VMs en el otro sitio sin restaurar nada
+    - Necesitas volver (failback) sin volver a copiar todo el disco
+    - Quieres DR sin licencias por VM ni una cabina de 30.000 EUR
+
+  LO QUE TE VA A DOLER
+    - DEMONIO: sin rbd-mirror corriendo (y con su llavero) NO replica nada.
+      El pool dice "enabled" y las imagenes se quedan en "unknown". Miralo primero.
+    - MODO: journal = RPO casi cero pero ESCRIBE DOS VECES en tu disco.
+      snapshot = barato, pero pierdes hasta un intervalo de programacion.
+    - NOMBRE DEL POOL: tiene que ser el MISMO en los dos clusteres.
+    - promote --force sin demote = SPLIT-BRAIN. Se arregla con
+      'rbd mirror image resync' en el lado que se rinde, y eso re-copia.
+    - Esto NO sustituye a las copias: un borrado se replica igual de rapido.
+      RBD mirroring + PBS. Los dos.
+
+  TODOS LOS COMANDOS Y SCRIPTS DE ESTE VIDEO:
+    github.com/logicalpeyote777/morinicomputers
