@@ -1,0 +1,2 @@
+# informe de cambios firmado, cada día a las 06:00 — Morini Computers
+0 6 * * * root /root/audit/informe-cambios.sh 1 >/dev/null 2>&1
