@@ -1,0 +1,24 @@
+# AdGuard Home — el DNS con filtrado de TODA la red.
+# Lab: host 'homelab', 10.10.10.10/24, dominio lab.local. Claves y datos FALSOS.
+services:
+  adguard:
+    # version fijada: 'latest' cambia bajo tus pies el dia menos pensado
+    image: adguard/adguardhome:v0.107.79
+    container_name: adguard
+
+    # LA LINEA QUE DECIDE LA SEGURIDAD DE ESTO.
+    # Con "ports: 53:53/udp" Docker publica el 53 en TODAS las interfaces
+    # (0.0.0.0) y mete sus propias reglas ANTES que las de tu cortafuegos:
+    # te quedas con un resolutor DNS abierto, tambien por el lado de internet.
+    # En modo host lo atamos a UNA sola direccion: la de la red de casa.
+    network_mode: host
+
+    volumes:
+      # AdGuardHome.yaml: la configuracion. Esto es lo que se versiona.
+      - ./conf:/opt/adguardhome/conf
+      # bases de datos, registro de consultas y estadisticas
+      - ./work:/opt/adguardhome/work
+
+    # Si se cae el DNS, para los de casa "no hay internet":
+    # esto no puede depender de que alguien lo levante a mano.
+    restart: unless-stopped

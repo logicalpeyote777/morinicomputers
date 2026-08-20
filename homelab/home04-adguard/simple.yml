@@ -1,0 +1,13 @@
+# El compose que circula por medio internet: la bridge por defecto y ports.
+# Arranca a la primera. Y deja tu resolutor escuchando en TODAS las interfaces.
+services:
+  adguard:
+    image: adguard/adguardhome:v0.107.79
+    container_name: adguard-bridge
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "3000:3000/tcp"
+    volumes:
+      - ./conf-bridge:/opt/adguardhome/conf
+      - ./work-bridge:/opt/adguardhome/work
