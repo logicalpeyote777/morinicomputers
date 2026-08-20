@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facturas-db
+    network_mode: bridge
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: facturas
+      POSTGRES_USER: facturas
+      POSTGRES_PASSWORD: clave-falsa-de-lab
+    volumes:
+      - ./semilla.sql:/docker-entrypoint-initdb.d/semilla.sql:ro
+  web:
+    image: nginx:alpine
+    container_name: facturas-web
+    network_mode: bridge
+    ports:
+      - "8080:80"

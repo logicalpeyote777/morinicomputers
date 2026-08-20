@@ -1,0 +1,30 @@
+name: notas
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: notas-db
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      POSTGRES_DB: notas
+      POSTGRES_USER: notas
+      POSTGRES_PASSWORD: otra-clave-falsa
+
+  web:
+    image: nginx:alpine
+    container_name: notas-web
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "10.10.10.10:8081:80"
+
+networks:
+  frontend:
+  backend:
+    internal: true

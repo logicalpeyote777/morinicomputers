@@ -1,0 +1,32 @@
+name: facturas
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: facturas-db
+    restart: unless-stopped
+    networks:
+      - backend
+    environment:
+      POSTGRES_DB: facturas
+      POSTGRES_USER: facturas
+      POSTGRES_PASSWORD: clave-falsa-de-lab
+    volumes:
+      - ./semilla.sql:/docker-entrypoint-initdb.d/semilla.sql:ro
+
+  web:
+    image: nginx:alpine
+    container_name: facturas-web
+    restart: unless-stopped
+    depends_on:
+      - db
+    networks:
+      - frontend
+      - backend
+    ports:
+      - "10.10.10.10:8080:80"
+
+networks:
+  frontend:
+  backend:
+    internal: true

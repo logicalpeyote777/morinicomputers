@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: notas-db
+    network_mode: bridge
+    environment:
+      POSTGRES_DB: notas
+      POSTGRES_USER: notas
+      POSTGRES_PASSWORD: otra-clave-falsa
+  web:
+    image: nginx:alpine
+    container_name: notas-web
+    network_mode: bridge
+    ports:
+      - "8081:80"
