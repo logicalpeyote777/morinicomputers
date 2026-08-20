@@ -1,0 +1,31 @@
+name: jellyfin
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.11
+    container_name: jellyfin
+    restart: unless-stopped
+
+    # NO como root: Jellyfin no necesita serlo, y un servicio expuesto
+    # que corre como root es un incidente esperando a pasar.
+    user: "1000:1000"
+
+    # --- LOS DOS BLOQUES QUE LE DAN LA GPU AL CONTENEDOR ---
+    devices:
+      - /dev/dri/renderD128:/dev/dri/renderD128   # el nodo de render de la GPU
+    group_add:
+      - "992"                                     # GID del grupo 'render' DEL HOST
+
+    volumes:
+      - ./config:/config          # base de datos, usuarios, ajustes
+      - ./cache:/cache            # miniaturas y trabajo temporal: desechable
+      - /srv/media:/media:ro      # la biblioteca, en SOLO LECTURA
+
+    ports:
+      - "10.10.10.10:8096:8096"   # atado a una IP, no a 0.0.0.0
+
+    networks:
+      - jellyfin_net
+
+networks:
+  jellyfin_net:

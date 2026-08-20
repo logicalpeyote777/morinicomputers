@@ -1,0 +1,25 @@
+name: jellyfin
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.11
+    container_name: jellyfin
+    restart: unless-stopped
+
+    # NO como root: Jellyfin no necesita serlo, y un servicio expuesto
+    # que corre como root es un incidente esperando a pasar.
+    user: "1000:1000"
+
+    volumes:
+      - ./config:/config          # base de datos, usuarios, ajustes
+      - ./cache:/cache            # miniaturas y trabajo temporal: desechable
+      - /srv/media:/media:ro      # la biblioteca, en SOLO LECTURA
+
+    ports:
+      - "10.10.10.10:8096:8096"   # atado a una IP, no a 0.0.0.0
+
+    networks:
+      - jellyfin_net
+
+networks:
+  jellyfin_net:
