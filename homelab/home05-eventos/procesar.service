@@ -1,0 +1,10 @@
+[Unit]
+Description=Procesa el buzon de facturas
+
+[Service]
+Type=oneshot
+User=homelab
+Group=homelab
+ExecStart=/home/homelab/lab/eventos/procesar.sh
+
+# Sin [Install]: este servicio NO se habilita. Quien se habilita es el .path.

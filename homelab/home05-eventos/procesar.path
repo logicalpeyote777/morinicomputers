@@ -1,0 +1,11 @@
+[Unit]
+Description=Vigila el buzon de facturas y dispara procesar.service
+
+[Path]
+# ESTADO, no evento: mientras quede algo en el buzon, vuelve a disparar.
+# Con PathChanged, lo que llega con la unidad parada se pierde para siempre.
+DirectoryNotEmpty=/home/homelab/lab/eventos/entrada
+Unit=procesar.service
+
+[Install]
+WantedBy=multi-user.target
