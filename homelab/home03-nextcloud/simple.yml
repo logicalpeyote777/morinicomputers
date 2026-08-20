@@ -1,0 +1,10 @@
+# El compose de tres lineas que circula por medio internet.
+# Funciona el primer dia. Y por eso mismo es una trampa.
+services:
+  nextcloud:
+    image: nextcloud:33-apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./simple-data:/var/www/html
+    restart: unless-stopped

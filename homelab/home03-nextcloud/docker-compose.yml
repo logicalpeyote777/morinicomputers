@@ -1,0 +1,50 @@
+services:
+  db:                                  # 1 · la base de datos: Postgres, no SQLite
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: nextcloud
+      POSTGRES_USER: nextcloud
+      POSTGRES_PASSWORD: clave-falsa-de-laboratorio
+    volumes: [ "./db:/var/lib/postgresql/data" ]
+    networks: [ datos ]                # solo la red interna: nadie la alcanza
+    healthcheck:                       # "sano" = contesta, no = "esta encendido"
+      test: ["CMD-SHELL", "pg_isready -U nextcloud"]
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  redis:                               # 2 · la cache y los cerrojos de fichero
+    image: redis:7-alpine
+    command: redis-server --requirepass redis-falsa-de-laboratorio
+    networks: [ datos ]
+    restart: unless-stopped
+
+  app:                                 # 3 · Nextcloud: lo unico que se publica
+    image: nextcloud:33-apache
+    ports: [ "10.10.10.10:8080:80" ]   # atado a UNA direccion, no a 0.0.0.0
+    volumes: [ "./html:/var/www/html" ]
+    environment:
+      POSTGRES_HOST: db
+      PHP_MEMORY_LIMIT: 1G
+    networks: [ datos, publica ]
+    depends_on:
+      db: { condition: service_healthy }
+    healthcheck:                       # tarda ~1 min en desplegar el codigo
+      test: ["CMD-SHELL", "curl -fs http://localhost/status.php || exit 1"]
+      interval: 10s
+      retries: 30
+    restart: unless-stopped
+
+  cron:                                # 4 · el reloj: misma imagen, otro trabajo
+    image: nextcloud:33-apache
+    entrypoint: /cron.sh               # cron.php cada 5 min, entre o no alguien
+    volumes: [ "./html:/var/www/html" ]
+    networks: [ datos ]
+    depends_on:
+      app: { condition: service_healthy }   # "arrancado" NO es "listo"
+    restart: unless-stopped
+
+networks:
+  publica:                             # la puerta de la calle
+  datos:
+    internal: true                     # sin ruta a internet: db y redis, aisladas
