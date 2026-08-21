@@ -1,0 +1,29 @@
+CUANDO SI y cuando NO  --  fijar CPUs en un servidor de PYME
+============================================================
+
+SI merece la pena
+  - Centralita VoIP (Asterisk, 3CX): los cortes de audio son picos de latencia.
+  - TPV y captura de pedidos que no se puede quedar colgado en hora punta.
+  - Control industrial, PLC, CNC, adquisicion de datos, audio o video en directo.
+  - La VM del ERP cuando por la noche corre el backup de todas las demas.
+
+NO merece la pena
+  - Un servidor con 3 o 4 VMs sin problemas de latencia: pierdes flexibilidad
+    y no ganas nada medible.
+  - Si vas justo de RAM: las hugepages se reservan y no se pueden usar para
+    otra cosa.
+  - Si necesitas migracion en caliente entre nodos distintos: la afinidad va
+    ligada a la numeracion de nucleos de ESE servidor.
+
+REGLAS QUE NO SE SALTAN
+  1. Deja siempre nucleos al hipervisor. Fijarlo todo y no dejarle ninguno
+     es peor que no fijar nada.
+  2. Una VM de tiempo real por juego de nucleos. Dos VMs en los mismos nucleos
+     es exactamente el problema que querias resolver.
+  3. Reserva nucleos FISICOS enteros, no hilos sueltos: en este servidor el
+     hilo 0 y el 4 son el mismo nucleo.
+  4. Con dos zocalos (NUMA), la VM entera en un solo nodo: vCPU y memoria del
+     mismo lado. Cruzar el bus cuesta bastante mas de latencia de memoria.
+  5. Mide antes y despues. Sin numero no hay mejora, hay fe.
+
+  Todo el codigo: github.com/logicalpeyote777/morinicomputers
