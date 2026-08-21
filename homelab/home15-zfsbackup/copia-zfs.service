@@ -1,0 +1,9 @@
+[Unit]
+Description=Copia ZFS cifrada al espejo
+# Sin el pool importado no hay copia que valga: mejor no arrancar que fingir que copió.
+Requires=zfs-import.target
+After=zfs-import.target
+
+[Service]
+Type=oneshot
+ExecStart=/srv/copias/respaldo-zfs.sh
